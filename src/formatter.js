@@ -7,8 +7,25 @@ import linebreak from "./linebreak";
  * Copyright 2009-2010, Bram Stein
  * All rights reserved.
  */
+
+const getWords = glyphString => {
+	const words = [];
+	const { start } = glyphString;
+	let lastIndex = 0;
+
+	for (const { index } of glyphString) {
+
+		if (glyphString.isWhiteSpace(index - start)) {
+			words.push(glyphString.slice(lastIndex, index - start));
+			lastIndex = index - start + 1;
+		}
+	}
+
+	return words;
+}
+
 const formatter = (measureText, options) => {
-  const spaceWidth = 4; // measureText(' ');
+  const spaceWidth = 10; // measureText(' ');
   const o = {
     space: {
         width: options && options.space.width || 3,
@@ -17,12 +34,12 @@ const formatter = (measureText, options) => {
     }
   };
   // const h = new Hypher(Hypher.en),
-  const hyphenWidth = 5; // measureText('-'),
+  const hyphenWidth = 15; // measureText('-'),
   const hyphenPenalty = 100;
 
-  return (text) => {
+  return (glyphString) => {
     const nodes = [];
-    const words = text.split(/\s/);
+    const words = getWords(glyphString);
     const spaceStretch = spaceWidth * o.space.width / o.space.stretch;
     const spaceShrink = spaceWidth * o.space.width / o.space.shrink;
 
