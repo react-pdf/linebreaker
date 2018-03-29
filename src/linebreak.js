@@ -1,4 +1,4 @@
-import LinkedList from './linkedList';
+import LinkedList from "./linkedList";
 
 /**
  * @preserve Knuth and Plass line breaking algorithm in JavaScript
@@ -16,7 +16,7 @@ const linebreak = (nodes, lines, settings) => {
       fitness:
         (settings && settings.demerits && settings.demerits.fitness) || 3000
     },
-    tolerance: (settings && settings.tolerance) || 2
+    tolerance: (settings && settings.tolerance) || 3
   };
   const activeNodes = new LinkedList();
   const sum = {
