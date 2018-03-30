@@ -54,14 +54,13 @@ const hyphenate = (glyphString) => {
 
 const formatter = (measureText, options = {}) => {
   const spaceWidth = measureText(' ');
+	const hyphenWidth = measureText('-');
+	const hyphenPenalty = 100;
   const opts = {
     width: options.width || 3,
     stretch: options.stretch || 6,
     shrink: options.shrink || 9
   };
-
-  const hyphenWidth = measureText('-');
-  const hyphenPenalty = 100;
 
   return (glyphString) => {
     const nodes = [];
@@ -74,7 +73,9 @@ const formatter = (measureText, options = {}) => {
 
       if (hyphenated.length > 1 && word.string.length > 4) {
         hyphenated.forEach((part, partIndex, partArray) => {
-          nodes.push(linebreak.box(measureText(part), part));
+					const isLastPart = partIndex === hyphenated.length - 1;
+
+          nodes.push(linebreak.box(measureText(part), part, !isLastPart));
 
           if (partIndex !== partArray.length - 1) {
             nodes.push(linebreak.penalty(hyphenWidth, hyphenPenalty, 1));

@@ -1,14 +1,21 @@
 import formatter from "./formatter";
 import linebreak from "./linebreak";
 
+const HYPHEN = 0x002d;
+
 class KPLineBreaker {
   suggestLineBreak(glyphString, width, hyphenationFactor = 0, tolerance = 3) {
     const nodes = formatter(this.measureWidth(glyphString))(glyphString);
     const breaks = linebreak(nodes, [width], { tolerance });
-    const breakNode = this.findBreakNode(nodes, breaks[1].position).value;
-    const breakPoint = breakNode.end - glyphString.start + 1;
+    const breakNode = this.findBreakNode(nodes, breaks[1].position);
+    let breakIndex = breakNode.value.end - glyphString.start + 1;
 
-    return { position: breakPoint };
+    if (breakNode.hyphenated) {
+      glyphString.insertGlyph(breakIndex, HYPHEN);
+      breakIndex += 1;
+    }
+
+    return { position: breakIndex };
   }
 
   measureWidth(glyphString) {

@@ -336,10 +336,11 @@ linebreak.glue = (width, stretch, shrink) => ({
   shrink
 });
 
-linebreak.box = (width, value) => ({
+linebreak.box = (width, value, hyphenated = false) => ({
   type: "box",
   width,
-  value
+  value,
+  hyphenated
 });
 
 linebreak.penalty = (width, penalty, flagged) => ({
