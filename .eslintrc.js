@@ -6,6 +6,7 @@ module.exports = {
     "jest/globals": true
   },
   rules: {
+    "no-cond-assign": 0,
     "no-restricted-syntax": 0,
     "class-methods-use-this": 0,
     "no-restricted-properties": 0,

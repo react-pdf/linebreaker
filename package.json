@@ -20,5 +20,9 @@
     "jest": "^22.4.2",
     "lint-staged": "^7.0.0",
     "prettier": "^1.11.1"
+  },
+  "dependencies": {
+    "hyphenation.en-us": "^0.2.1",
+    "hypher": "^0.2.5"
   }
 }

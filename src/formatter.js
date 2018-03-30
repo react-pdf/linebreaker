@@ -1,12 +1,8 @@
+import english from 'hyphenation.en-us';
+import Hypher from 'hypher';
 import linebreak from "./linebreak";
 
-/*!
- * Knuth and Plass line breaking algorithm in JavaScript
- *
- * Licensed under the new BSD License.
- * Copyright 2009-2010, Bram Stein
- * All rights reserved.
- */
+const SOFT_HYPHEN = '\u00AD';
 
 const getWords = glyphString => {
 	const words = [];
@@ -14,47 +10,79 @@ const getWords = glyphString => {
 	let lastIndex = 0;
 
 	for (const { index } of glyphString) {
-
 		if (glyphString.isWhiteSpace(index - start)) {
-			words.push(glyphString.slice(lastIndex, index - start));
+			const word = glyphString.slice(lastIndex, index - start);
+
+			if (word.length > 0) {
+				words.push(word);
+			}
+
 			lastIndex = index - start + 1;
 		}
+	}
+
+	if (lastIndex < glyphString.end) {
+		const word = glyphString.slice(lastIndex, glyphString.end - glyphString.start);
+		words.push(word);
 	}
 
 	return words;
 }
 
-const formatter = (measureText, options) => {
-  const spaceWidth = 10; // measureText(' ');
-  const o = {
-    space: {
-        width: options && options.space.width || 3,
-        stretch: options && options.space.stretch || 6,
-        shrink: options && options.space.shrink || 9
-    }
+const h = new Hypher(english);
+
+const hyphenateString = (string) => {
+	if (string.includes(SOFT_HYPHEN)) {
+		return string.split(SOFT_HYPHEN)
+	}
+
+	return h.hyphenate(string);
+}
+
+const hyphenate = (glyphString) => {
+	const hyphenated = hyphenateString(glyphString.string);
+
+	let index = 0;
+	const parts = hyphenated.map(part => {
+		const res = glyphString.slice(index, index + part.length);
+		index += part.length
+		return res;
+	});
+
+	return parts;
+}
+
+const formatter = (measureText, options = {}) => {
+  const spaceWidth = measureText(' ');
+  const opts = {
+    width: options.width || 3,
+    stretch: options.stretch || 6,
+    shrink: options.shrink || 9
   };
-  // const h = new Hypher(Hypher.en),
-  const hyphenWidth = 15; // measureText('-'),
+
+  const hyphenWidth = measureText('-');
   const hyphenPenalty = 100;
 
   return (glyphString) => {
     const nodes = [];
     const words = getWords(glyphString);
-    const spaceStretch = spaceWidth * o.space.width / o.space.stretch;
-    const spaceShrink = spaceWidth * o.space.width / o.space.shrink;
+    const spaceStretch = spaceWidth * opts.width / opts.stretch;
+    const spaceShrink = spaceWidth * opts.width / opts.shrink;
 
     words.forEach((word, index, array) => {
-      // var hyphenated = h.hyphenate(word);
-      // if (hyphenated.length > 1 && word.length > 4) {
-      //   hyphenated.forEach(function(part, partIndex, partArray) {
-      //     nodes.push(linebreak.box(measureText(part), part));
-      //     if (partIndex !== partArray.length - 1) {
-      //       nodes.push(linebreak.penalty(hyphenWidth, hyphenPenalty, 1));
-      //     }
-      //   });
-      // } else {
-      nodes.push(linebreak.box(measureText(word), word));
-      // }
+      const hyphenated = hyphenate(word);
+
+      if (hyphenated.length > 1 && word.string.length > 4) {
+        hyphenated.forEach((part, partIndex, partArray) => {
+          nodes.push(linebreak.box(measureText(part), part));
+
+          if (partIndex !== partArray.length - 1) {
+            nodes.push(linebreak.penalty(hyphenWidth, hyphenPenalty, 1));
+          }
+        });
+      } else {
+      	nodes.push(linebreak.box(measureText(word), word));
+      }
       if (index === array.length - 1) {
         nodes.push(linebreak.glue(0, linebreak.infinity, 0));
         nodes.push(linebreak.penalty(0, -linebreak.infinity, 1));
@@ -62,6 +90,7 @@ const formatter = (measureText, options) => {
         nodes.push(linebreak.glue(spaceWidth, spaceStretch, spaceShrink));
       }
     });
+
     return nodes;
   }
 };
