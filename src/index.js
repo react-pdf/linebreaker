@@ -4,9 +4,18 @@ import linebreak from "./linebreak";
 const HYPHEN = 0x002d;
 
 class KPLineBreaker {
-  suggestLineBreak(glyphString, width, hyphenationFactor = 0, tolerance = 3) {
+  constructor(tolerance) {
+    this.tolerance = tolerance || 3;
+  }
+
+  suggestLineBreak(glyphString, width, hyphenationFactor = 0) {
     const nodes = formatter(this.measureWidth(glyphString))(glyphString);
-    const breaks = linebreak(nodes, [width], { tolerance });
+    const breaks = linebreak(nodes, [width], { tolerance: this.tolerance });
+
+    if (!breaks[1]) {
+      return { position: glyphString.end };
+    }
+
     const breakNode = this.findBreakNode(nodes, breaks[1].position);
     let breakIndex = breakNode.value.end - glyphString.start + 1;
 
