@@ -4,12 +4,16 @@ import linebreak from "./linebreak";
 const HYPHEN = 0x002d;
 
 class KPLineBreaker {
-  constructor(tolerance) {
+  constructor(callback, tolerance) {
     this.tolerance = tolerance || 3;
+    this.callback = callback;
   }
 
   suggestLineBreak(glyphString, width) {
-    const nodes = formatter(this.measureWidth(glyphString))(glyphString);
+    const nodes = formatter(
+      this.measureWidth(glyphString),
+      this.callback,
+    )(glyphString);
     const breaks = linebreak(nodes, [width], { tolerance: this.tolerance });
 
     if (!breaks[1]) {

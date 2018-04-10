@@ -1,5 +1,5 @@
-import createHyphenator from 'hyphen';
-import DE from 'hyphen/patterns/de';
+import english from 'hyphenation.en-us';
+import Hypher from 'hypher';
 import linebreak from "./linebreak";
 
 const SOFT_HYPHEN = '\u00AD';
@@ -29,51 +29,50 @@ const getWords = glyphString => {
 	return words;
 }
 
-const hypenator = createHyphenator(DE);
-
+const h = new Hypher(english);
 const hyphenateString = (string) => {
 	if (string.includes(SOFT_HYPHEN)) {
 		return string.split(SOFT_HYPHEN)
 	}
 
-	return hypenator(string).split(SOFT_HYPHEN);
+	return h.hyphenate(string);
 }
 
-const hyphenate = (glyphString) => {
+const hyphenateWord = (glyphString) => {
 	const hyphenated = hyphenateString(glyphString.string);
 
 	let index = 0;
 	const parts = hyphenated.map(part => {
 		const res = glyphString.slice(index, index + part.length);
-		index += part.length
+		index += part.length;
 		return res;
 	});
 
 	return parts;
 }
 
-const formatter = (measureText, options = {}) => {
+const hyphenate = (words) => (
+	words.map(word => hyphenateWord(word))
+);
+
+const formatter = (measureText, callback) => {
   const spaceWidth = measureText(' ');
 	const hyphenWidth = measureText('-');
 	const hyphenPenalty = 100;
-  const opts = {
-    width: options.width || 3,
-    stretch: options.stretch || 6,
-    shrink: options.shrink || 9
-  };
+  const opts = { width: 3, stretch: 6, shrink: 9 };
 
   return (glyphString) => {
     const nodes = [];
     const words = getWords(glyphString);
     const spaceStretch = spaceWidth * opts.width / opts.stretch;
     const spaceShrink = spaceWidth * opts.width / opts.shrink;
+		const hyphenationCallback = callback || hyphenate;
+		const hyphenatedWords = hyphenationCallback(words, glyphString);
 
-    words.forEach((word, index, array) => {
-      const hyphenated = hyphenate(word);
-
-      if (hyphenated.length > 1 && word.string.length > 4) {
-        hyphenated.forEach((part, partIndex, partArray) => {
-					const isLastPart = partIndex === hyphenated.length - 1;
+    hyphenatedWords.forEach((word, index, array) => {
+      if (word.length > 1) {
+        word.forEach((part, partIndex, partArray) => {
+					const isLastPart = partIndex === word.length - 1;
 
           nodes.push(linebreak.box(measureText(part), part, !isLastPart));
 
@@ -82,7 +81,7 @@ const formatter = (measureText, options = {}) => {
           }
         });
       } else {
-      	nodes.push(linebreak.box(measureText(word), word));
+      	nodes.push(linebreak.box(measureText(word[0]), word[0]));
       }
       if (index === array.length - 1) {
         nodes.push(linebreak.glue(0, linebreak.infinity, 0));
