@@ -1,5 +1,5 @@
-import english from 'hyphenation.en-us';
-import Hypher from 'hypher';
+import createHyphenator from 'hyphen';
+import DE from 'hyphen/patterns/de';
 import linebreak from "./linebreak";
 
 const SOFT_HYPHEN = '\u00AD';
@@ -29,14 +29,14 @@ const getWords = glyphString => {
 	return words;
 }
 
-const h = new Hypher(english);
+const hypenator = createHyphenator(DE);
 
 const hyphenateString = (string) => {
 	if (string.includes(SOFT_HYPHEN)) {
 		return string.split(SOFT_HYPHEN)
 	}
 
-	return h.hyphenate(string);
+	return hypenator(string).split(SOFT_HYPHEN);
 }
 
 const hyphenate = (glyphString) => {

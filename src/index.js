@@ -8,7 +8,7 @@ class KPLineBreaker {
     this.tolerance = tolerance || 3;
   }
 
-  suggestLineBreak(glyphString, width, hyphenationFactor = 0) {
+  suggestLineBreak(glyphString, width) {
     const nodes = formatter(this.measureWidth(glyphString))(glyphString);
     const breaks = linebreak(nodes, [width], { tolerance: this.tolerance });
 
