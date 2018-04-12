@@ -21,7 +21,7 @@ class KPLineBreaker {
     }
 
     const breakNode = this.findBreakNode(nodes, breaks[1].position);
-    let breakIndex = breakNode.value.end - glyphString.start + 1;
+    let breakIndex = breakNode.value.end - glyphString.start;
 
     if (breakNode.hyphenated) {
       glyphString.insertGlyph(breakIndex, HYPHEN);
