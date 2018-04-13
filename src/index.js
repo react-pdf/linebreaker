@@ -5,7 +5,7 @@ const HYPHEN = 0x002d;
 
 class KPLineBreaker {
   constructor(callback, tolerance) {
-    this.tolerance = tolerance || 3;
+    this.tolerance = tolerance || 4;
     this.callback = callback;
   }
 
