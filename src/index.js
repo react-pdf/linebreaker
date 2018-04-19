@@ -2,6 +2,7 @@ import formatter from "./formatter";
 import linebreak from "./linebreak";
 
 const HYPHEN = 0x002d;
+const TOLERANCE_LIMIT = 30;
 
 class KPLineBreaker {
   constructor(callback, tolerance) {
@@ -10,11 +11,16 @@ class KPLineBreaker {
   }
 
   suggestLineBreak(glyphString, width) {
-    const nodes = formatter(
-      this.measureWidth(glyphString),
-      this.callback,
-    )(glyphString);
-    const breaks = linebreak(nodes, [width], { tolerance: this.tolerance });
+    let tolerance = this.tolerance;
+    const measuredWidth = this.measureWidth(glyphString);
+    const nodes = formatter(measuredWidth, this.callback)(glyphString);
+    let breaks = [];
+
+    // Try again with a higher tolerance if the line breaking failed.
+    while (breaks.length === 0 && tolerance < TOLERANCE_LIMIT) {
+      breaks = linebreak(nodes, [width], { tolerance });
+      tolerance += 2;
+    }
 
     if (!breaks[1]) {
       return { position: glyphString.end };
