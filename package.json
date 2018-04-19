@@ -1,11 +1,17 @@
 {
-  "name": "linebreaker",
+  "name": "@react-pdf/linebreaker",
   "version": "1.0.0",
+  "repository": "git@github.com:react-pdf/linebreaker.git",
+  "author": "Diego Muracciole <diegomuracciole@gmail.com>",
   "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
-    "build": "babel ./src --out-dir ./dist"
+    "build": "babel ./src --out-dir ./dist",
+    "prepublish": "npm run build"
   },
+  "files": [
+    "dist"
+  ],
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-eslint": "^8.2.2",
@@ -22,7 +28,6 @@
     "prettier": "^1.11.1"
   },
   "dependencies": {
-    "hyphen": "^1.0.2",
     "hyphenation.en-us": "^0.2.1",
     "hypher": "^0.2.5"
   }
