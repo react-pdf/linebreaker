@@ -2,11 +2,11 @@ import formatter from "./formatter";
 import linebreak from "./linebreak";
 
 const HYPHEN = 0x002d;
-const TOLERANCE_LIMIT = 30;
+const TOLERANCE_LIMIT = 55;
 
 class KPLineBreaker {
   constructor(callback, tolerance) {
-    this.tolerance = tolerance || 4;
+    this.tolerance = tolerance || 8;
     this.callback = callback;
   }
 
