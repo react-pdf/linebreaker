@@ -28,6 +28,7 @@
     "prettier": "^1.11.1"
   },
   "dependencies": {
+    "@react-pdf/textkit": "0.1.0",
     "hyphenation.en-us": "^0.2.1",
     "hypher": "^0.2.5"
   }

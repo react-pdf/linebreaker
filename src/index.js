@@ -1,12 +1,15 @@
+import { LineBreaker } from '@react-pdf/textkit';
 import formatter from "./formatter";
 import linebreak from "./linebreak";
 
 const HYPHEN = 0x002d;
-const TOLERANCE_LIMIT = 55;
+const TOLERANCE_LIMIT = 40;
+
+const fallbackLinebreaker = new LineBreaker();
 
 class KPLineBreaker {
   constructor(callback, tolerance) {
-    this.tolerance = tolerance || 8;
+    this.tolerance = tolerance || 4;
     this.callback = callback;
   }
 
@@ -20,6 +23,11 @@ class KPLineBreaker {
     while (breaks.length === 0 && tolerance < TOLERANCE_LIMIT) {
       breaks = linebreak(nodes, [width], { tolerance });
       tolerance += 2;
+    }
+
+    // Fallback to textkit default's linebreaking algorithm if K&P fails
+    if (breaks.length === 0) {
+      return fallbackLinebreaker.suggestLineBreak(glyphString, width);
     }
 
     if (!breaks[1]) {
