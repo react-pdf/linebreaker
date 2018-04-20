@@ -27,14 +27,13 @@ class KPLineBreaker {
     }
 
     const breakNode = this.findBreakNode(nodes, breaks[1].position);
-    let breakIndex = breakNode.value.end - glyphString.start;
+    const breakIndex = breakNode.value.end - glyphString.start;
 
     if (breakNode.hyphenated) {
       glyphString.insertGlyph(breakIndex, HYPHEN);
-      breakIndex += 1;
     }
 
-    return { position: breakIndex };
+    return { position: breakIndex + 1 };
   }
 
   measureWidth(glyphString) {
