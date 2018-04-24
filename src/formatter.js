@@ -2,77 +2,94 @@ import english from 'hyphenation.en-us';
 import Hypher from 'hypher';
 import linebreak from "./linebreak";
 
-const SOFT_HYPHEN = '\u00AD';
+const SOFT_HYPHEN_HEX = '\u00ad';
+const WHITE_SPACE_HEX = 0x0020;
+const NO_BREAK_SPACE_DECIMAL = 160;
 
 const getWords = glyphString => {
-	const words = [];
-	const { start } = glyphString;
-	let lastIndex = 0;
+  const words = [];
+  const {start} = glyphString;
+	const noBreakSpaces = [];
+  let lastIndex = 0;
 
-	for (const { index } of glyphString) {
-		if (glyphString.isWhiteSpace(index - start)) {
-			const word = glyphString.slice(lastIndex, index - start);
+  for (const { index } of glyphString) {
+    const codePoint = glyphString.codePointAtGlyphIndex(index);
 
-			if (word.length > 0) {
-				words.push(word);
-			}
-
-			lastIndex = index - start + 1;
+		if (codePoint === NO_BREAK_SPACE_DECIMAL) {
+			noBreakSpaces.push(index);
+			continue;
 		}
-	}
 
-	if (lastIndex < glyphString.end) {
-		const word = glyphString.slice(lastIndex, glyphString.end - glyphString.start);
-		words.push(word);
-	}
+    if (glyphString.isWhiteSpace(index - start)) {
+      const word = glyphString.slice(lastIndex, index - start);
 
-	return words;
+      if (word.length > 0) {
+        words.push(word);
+      }
+
+      lastIndex = index - start + 1;
+    }
+  }
+
+	noBreakSpaces.forEach(index => {
+		glyphString.deleteGlyph(index);
+		glyphString.insertGlyph(index, WHITE_SPACE_HEX);
+	});
+
+  if (lastIndex < glyphString.end) {
+    const word = glyphString.slice(lastIndex, glyphString.end - glyphString.start);
+    words.push(word);
+  }
+
+  return words;
 }
 
 const h = new Hypher(english);
 const hyphenateString = (string) => {
-	if (string.includes(SOFT_HYPHEN)) {
-		return string.split(SOFT_HYPHEN)
-	}
+  if (string.includes(SOFT_HYPHEN_HEX)) {
+    return string.split(SOFT_HYPHEN_HEX)
+  }
 
-	return h.hyphenate(string);
+  return h.hyphenate(string);
 }
 
 const hyphenateWord = (glyphString) => {
-	const hyphenated = hyphenateString(glyphString.string);
+  const hyphenated = hyphenateString(glyphString.string);
 
-	let index = 0;
-	const parts = hyphenated.map(part => {
-		const res = glyphString.slice(index, index + part.length);
-		index += part.length;
-		return res;
-	});
+  let index = 0;
+  const parts = hyphenated.map(part => {
+    const res = glyphString.slice(index, index + part.length);
+    index += part.length;
+    return res;
+  });
 
-	return parts;
+  return parts;
 }
 
-const hyphenate = (words) => (
-	words.map(word => hyphenateWord(word))
-);
+const hyphenate = (words) => (words.map(word => hyphenateWord(word)));
 
 const formatter = (measureText, callback) => {
   const spaceWidth = measureText(' ');
-	const hyphenWidth = measureText('-');
-	const hyphenPenalty = 100;
-  const opts = { width: 3, stretch: 6, shrink: 9 };
+  const hyphenWidth = measureText('-');
+  const hyphenPenalty = 100;
+  const opts = {
+    width: 3,
+    stretch: 6,
+    shrink: 9
+  };
 
-  return (glyphString) => {
+  return(glyphString) => {
     const nodes = [];
     const words = getWords(glyphString);
     const spaceStretch = spaceWidth * opts.width / opts.stretch;
     const spaceShrink = spaceWidth * opts.width / opts.shrink;
-		const hyphenationCallback = callback || hyphenate;
-		const hyphenatedWords = hyphenationCallback(words, glyphString);
+    const hyphenationCallback = callback || hyphenate;
+    const hyphenatedWords = hyphenationCallback(words, glyphString);
 
     hyphenatedWords.forEach((word, index, array) => {
       if (word.length > 1) {
         word.forEach((part, partIndex, partArray) => {
-					const isLastPart = partIndex === word.length - 1;
+          const isLastPart = partIndex === word.length - 1;
 
           nodes.push(linebreak.box(measureText(part), part, !isLastPart));
 
@@ -81,7 +98,7 @@ const formatter = (measureText, callback) => {
           }
         });
       } else {
-      	nodes.push(linebreak.box(measureText(word[0]), word[0]));
+        nodes.push(linebreak.box(measureText(word[0]), word[0]));
       }
       if (index === array.length - 1) {
         nodes.push(linebreak.glue(0, linebreak.infinity, 0));
