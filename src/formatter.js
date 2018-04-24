@@ -5,29 +5,42 @@ import linebreak from "./linebreak";
 const SOFT_HYPHEN_HEX = '\u00ad';
 const NO_BREAK_SPACE_DECIMAL = 160;
 
-const isValidWhiteSpace = (glyphString, index) => {
-	const codePoint = glyphString.codePointAtGlyphIndex(index);
+const isValidWhiteSpace = (glyphString, codePoint, index) => (
+	glyphString.isWhiteSpace(index) && codePoint !== NO_BREAK_SPACE_DECIMAL
+);
 
-	return (
-		glyphString.isWhiteSpace(index) &&
-		codePoint !== NO_BREAK_SPACE_DECIMAL
-	);
-};
+const getWhiteSpaceId = glyph => (
+	glyph._font.layout(' ').glyphs[0].id
+)
 
 const getWords = glyphString => {
 	const words = [];
 	const { start } = glyphString;
+	let whiteSpaceId = null;
 	let lastIndex = 0;
 
-	for (const { index } of glyphString) {
-		if (isValidWhiteSpace(glyphString, index - start)) {
+	for (const { index, glyph } of glyphString) {
+		const codePoint = glyphString.codePointAtGlyphIndex(index);
+
+		if (isValidWhiteSpace(glyphString, codePoint, index - start)) {
 			const word = glyphString.slice(lastIndex, index - start);
 
 			if (word.length > 0) {
 				words.push(word);
 			}
 
+			if (!whiteSpaceId) {
+				whiteSpaceId = whiteSpaceId || getWhiteSpaceId(glyph);
+			}
+
 			lastIndex = index - start + 1;
+		}
+
+		// We cache a valid whitespace glyph id to replace no-break-spaces with it
+		// after word breaking. If not present, we create it. This hack is purely
+		// for efficiency and performance purposes.
+		if (codePoint === NO_BREAK_SPACE_DECIMAL) {
+			glyph.id = whiteSpaceId;
 		}
 	}
 
