@@ -2,7 +2,17 @@ import english from 'hyphenation.en-us';
 import Hypher from 'hypher';
 import linebreak from "./linebreak";
 
-const SOFT_HYPHEN = '\u00AD';
+const SOFT_HYPHEN_HEX = '\u00ad';
+const NO_BREAK_SPACE_DECIMAL = 160;
+
+const isValidWhiteSpace = (glyphString, index) => {
+	const codePoint = glyphString.codePointAtGlyphIndex(index);
+
+	return (
+		glyphString.isWhiteSpace(index) &&
+		codePoint !== NO_BREAK_SPACE_DECIMAL
+	);
+};
 
 const getWords = glyphString => {
 	const words = [];
@@ -10,7 +20,7 @@ const getWords = glyphString => {
 	let lastIndex = 0;
 
 	for (const { index } of glyphString) {
-		if (glyphString.isWhiteSpace(index - start)) {
+		if (isValidWhiteSpace(glyphString, index - start)) {
 			const word = glyphString.slice(lastIndex, index - start);
 
 			if (word.length > 0) {
@@ -31,8 +41,8 @@ const getWords = glyphString => {
 
 const h = new Hypher(english);
 const hyphenateString = (string) => {
-	if (string.includes(SOFT_HYPHEN)) {
-		return string.split(SOFT_HYPHEN)
+	if (string.includes(SOFT_HYPHEN_HEX)) {
+		return string.split(SOFT_HYPHEN_HEX)
 	}
 
 	return h.hyphenate(string);
