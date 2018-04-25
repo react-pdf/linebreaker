@@ -39,9 +39,12 @@ class KPLineBreaker {
 
     if (breakNode.hyphenated) {
       glyphString.insertGlyph(breakIndex, HYPHEN);
+      return { position: breakIndex + 1 };
     }
 
-    return { position: breakIndex + 1 };
+    // We kep the blank space at the end of the line to avoid justification issues
+    const offset = glyphString.isWhiteSpace(breakIndex) ? 1 : 0;
+    return { position: breakIndex + offset };
   }
 
   measureWidth(glyphString) {
