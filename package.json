@@ -28,6 +28,7 @@
     "prettier": "^1.11.1"
   },
   "dependencies": {
+    "@textkit/linebreaker": "^0.1.4",
     "hyphenation.en-us": "^0.2.1",
     "hypher": "^0.2.5"
   }

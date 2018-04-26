@@ -1,11 +1,13 @@
+import createLinebreaker from '@textkit/linebreaker';
 import formatter from "./formatter";
 import linebreak from "./linebreak";
 
 const HYPHEN = 0x002d;
 const TOLERANCE_LIMIT = 40;
 
-export default ({ LineBreaker }) => {
-  const fallbackLinebreaker = new LineBreaker();
+export default Textkit => {
+  const TextkitLinebreaker = createLinebreaker(Textkit);
+  const fallbackLinebreaker = new TextkitLinebreaker();
 
   return class KPLineBreaker {
     constructor(callback, tolerance) {
