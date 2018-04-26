@@ -3,3 +3,4 @@ yarn.lock
 .DS_Store
 dist
 *.pdf
+yarn-error.log
