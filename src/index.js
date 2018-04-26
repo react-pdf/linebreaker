@@ -1,74 +1,73 @@
-import { LineBreaker } from '@react-pdf/textkit';
 import formatter from "./formatter";
 import linebreak from "./linebreak";
 
 const HYPHEN = 0x002d;
 const TOLERANCE_LIMIT = 40;
 
-const fallbackLinebreaker = new LineBreaker();
+export default ({ LineBreaker }) => {
+  const fallbackLinebreaker = new LineBreaker();
 
-class KPLineBreaker {
-  constructor(callback, tolerance) {
-    this.tolerance = tolerance || 4;
-    this.callback = callback;
-  }
-
-  suggestLineBreak(glyphString, width) {
-    let tolerance = this.tolerance;
-    const measuredWidth = this.measureWidth(glyphString);
-    const nodes = formatter(measuredWidth, this.callback)(glyphString);
-    let breaks = [];
-
-    // Try again with a higher tolerance if the line breaking failed.
-    while (breaks.length === 0 && tolerance < TOLERANCE_LIMIT) {
-      breaks = linebreak(nodes, [width], { tolerance });
-      tolerance += 2;
+  return class KPLineBreaker {
+    constructor(callback, tolerance) {
+      this.tolerance = tolerance || 4;
+      this.callback = callback;
     }
 
-    // Fallback to textkit default's linebreaking algorithm if K&P fails
-    if (breaks.length === 0) {
-      return fallbackLinebreaker.suggestLineBreak(glyphString, width);
-    }
+    suggestLineBreak(glyphString, width) {
+      let tolerance = this.tolerance;
+      const measuredWidth = this.measureWidth(glyphString);
+      const nodes = formatter(measuredWidth, this.callback)(glyphString);
+      let breaks = [];
 
-    if (!breaks[1]) {
-      return { position: glyphString.end };
-    }
-
-    const breakNode = this.findBreakNode(nodes, breaks[1].position);
-    const breakIndex = breakNode.value.end - glyphString.start;
-
-    if (breakNode.hyphenated) {
-      glyphString.insertGlyph(breakIndex, HYPHEN);
-      return { position: breakIndex + 1 };
-    }
-
-    // We kep the blank space at the end of the line to avoid justification issues
-    const offset = glyphString.isWhiteSpace(breakIndex) ? 1 : 0;
-    return { position: breakIndex + offset };
-  }
-
-  measureWidth(glyphString) {
-    const { font, fontSize } = glyphString.glyphRuns[0].attributes;
-
-    return word => {
-      if (typeof word  === 'string') {
-        const scale = fontSize / font.unitsPerEm;
-        return font.layout(word).positions[0].xAdvance * scale;
+      // Try again with a higher tolerance if the line breaking failed.
+      while (breaks.length === 0 && tolerance < TOLERANCE_LIMIT) {
+        breaks = linebreak(nodes, [width], { tolerance });
+        tolerance += 2;
       }
 
-      return word.advanceWidth;
-    };
-  }
+      // Fallback to textkit default's linebreaking algorithm if K&P fails
+      if (breaks.length === 0) {
+        return fallbackLinebreaker.suggestLineBreak(glyphString, width);
+      }
 
-  findBreakNode(nodes, position) {
-    let index = position - 1;
+      if (!breaks[1]) {
+        return { position: glyphString.end };
+      }
 
-    while (!nodes[index].value) {
-      index -= 1;
+      const breakNode = this.findBreakNode(nodes, breaks[1].position);
+      const breakIndex = breakNode.value.end - glyphString.start;
+
+      if (breakNode.hyphenated) {
+        glyphString.insertGlyph(breakIndex, HYPHEN);
+        return { position: breakIndex + 1 };
+      }
+
+      // We kep the blank space at the end of the line to avoid justification issues
+      const offset = glyphString.isWhiteSpace(breakIndex) ? 1 : 0;
+      return { position: breakIndex + offset };
     }
 
-    return nodes[index];
+    measureWidth(glyphString) {
+      const { font, fontSize } = glyphString.glyphRuns[0].attributes;
+
+      return word => {
+        if (typeof word  === 'string') {
+          const scale = fontSize / font.unitsPerEm;
+          return font.layout(word).positions[0].xAdvance * scale;
+        }
+
+        return word.advanceWidth;
+      };
+    }
+
+    findBreakNode(nodes, position) {
+      let index = position - 1;
+
+      while (!nodes[index].value) {
+        index -= 1;
+      }
+
+      return nodes[index];
+    }
   }
 }
-
-export default KPLineBreaker;
