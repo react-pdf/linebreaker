@@ -5,20 +5,19 @@ import linebreak from "./linebreak";
 const HYPHEN = 0x002d;
 const TOLERANCE_LIMIT = 40;
 
-export default Textkit => {
+export default ({ hyphenationCallback } = {}) => Textkit => {
   const TextkitLinebreaker = createLinebreaker(Textkit);
   const fallbackLinebreaker = new TextkitLinebreaker();
 
   return class KPLineBreaker {
-    constructor(callback, tolerance) {
+    constructor(tolerance) {
       this.tolerance = tolerance || 4;
-      this.callback = callback;
     }
 
     suggestLineBreak(glyphString, width) {
       let tolerance = this.tolerance;
       const measuredWidth = this.measureWidth(glyphString);
-      const nodes = formatter(measuredWidth, this.callback)(glyphString);
+      const nodes = formatter(measuredWidth, hyphenationCallback)(glyphString);
       let breaks = [];
 
       // Try again with a higher tolerance if the line breaking failed.
