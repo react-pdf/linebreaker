@@ -6,7 +6,7 @@ const HYPHEN = 0x002d;
 const TOLERANCE_LIMIT = 40;
 
 export default ({ hyphenationCallback } = {}) => Textkit => {
-  const TextkitLinebreaker = createLinebreaker(Textkit);
+  const TextkitLinebreaker = createLinebreaker()(Textkit);
   const fallbackLinebreaker = new TextkitLinebreaker();
 
   return class KPLineBreaker {
