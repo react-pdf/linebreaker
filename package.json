@@ -1,6 +1,6 @@
 {
   "name": "@react-pdf/linebreaker",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "repository": "git@github.com:react-pdf/linebreaker.git",
   "author": "Diego Muracciole <diegomuracciole@gmail.com>",
   "main": "dist/index.js",
