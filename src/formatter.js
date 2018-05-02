@@ -61,10 +61,10 @@ const hyphenateWord = (glyphString) => {
 
 const hyphenate = (words) => (words.map(word => hyphenateWord(word)));
 
-const formatter = (measureText, callback) => {
+const formatter = (measureText, textAlign, callback) => {
   const spaceWidth = measureText(' ');
   const hyphenWidth = measureText('-');
-  const hyphenPenalty = 100;
+  const hyphenPenalty = !textAlign || textAlign === 'justify' ? 100 : 600;
   const opts = {
     width: 3,
     stretch: 6,

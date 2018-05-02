@@ -14,10 +14,14 @@ export default ({ hyphenationCallback } = {}) => Textkit => {
       this.tolerance = tolerance || 4;
     }
 
-    suggestLineBreak(glyphString, width) {
+    suggestLineBreak(glyphString, width, paragraphStyle) {
       let tolerance = this.tolerance;
       const measuredWidth = this.measureWidth(glyphString);
-      const nodes = formatter(measuredWidth, hyphenationCallback)(glyphString);
+      const nodes = formatter(
+        measuredWidth,
+        hyphenationCallback,
+        paragraphStyle.align,
+      )(glyphString);
       let breaks = [];
 
       // Try again with a higher tolerance if the line breaking failed.
