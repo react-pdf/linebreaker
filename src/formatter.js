@@ -3,20 +3,18 @@ import Hypher from 'hypher';
 import linebreak from "./linebreak";
 
 const SOFT_HYPHEN_HEX = '\u00ad';
-const WHITE_SPACE_HEX = 0x0020;
 const NO_BREAK_SPACE_DECIMAL = 160;
 
 const getWords = glyphString => {
   const words = [];
   const {start} = glyphString;
-	const noBreakSpaces = [];
   let lastIndex = 0;
 
   for (const { index } of glyphString) {
     const codePoint = glyphString.codePointAtGlyphIndex(index);
 
+    // Not break words in no-break-spaces
 		if (codePoint === NO_BREAK_SPACE_DECIMAL) {
-			noBreakSpaces.push(index);
 			continue;
 		}
 
@@ -30,11 +28,6 @@ const getWords = glyphString => {
       lastIndex = index - start + 1;
     }
   }
-
-	noBreakSpaces.forEach(index => {
-		glyphString.deleteGlyph(index);
-		glyphString.insertGlyph(index, WHITE_SPACE_HEX);
-	});
 
   if (lastIndex < glyphString.end) {
     const word = glyphString.slice(lastIndex, glyphString.end - glyphString.start);
