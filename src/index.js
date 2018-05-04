@@ -19,8 +19,8 @@ export default ({ hyphenationCallback } = {}) => Textkit => {
       const measuredWidth = this.measureWidth(glyphString);
       const nodes = formatter(
         measuredWidth,
-        hyphenationCallback,
         paragraphStyle.align,
+        hyphenationCallback,
       )(glyphString);
       let breaks = [];
 
