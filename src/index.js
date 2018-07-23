@@ -32,7 +32,7 @@ export default ({ hyphenationCallback } = {}) => Textkit => {
 
       // Fallback to textkit default's linebreaking algorithm if K&P fails
       if (breaks.length === 0) {
-        return fallbackLinebreaker.suggestLineBreak(glyphString, width);
+        return fallbackLinebreaker.suggestLineBreak(glyphString, width, paragraphStyle);
       }
 
       if (!breaks[1]) {
